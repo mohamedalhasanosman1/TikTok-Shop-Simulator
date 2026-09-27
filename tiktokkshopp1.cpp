@@ -1,10 +1,15 @@
 /*
+ * TikTok Shop Simulator - Interactive console system (C++)
+ * Theme: TikTok Social Commerce
+ *
+ * Features:
  * - Browse products
  * - Add to cart
  * - View/remove items
+ * - Change cart quantity
  * - Promo codes
  * - Live stream discount
- *  product recommendation
+ * - "For You" product recommendation
  * - Checkout with receipt
  */
 
@@ -113,13 +118,14 @@ void showMenu() {
          << "2. Add to cart\n"
          << "3. View cart\n"
          << "4. Remove item from cart\n"
-         << "5. Checkout\n"
-         << "6. For You recommendation\n"
-         << "7. Exit\n";
+         << "5. Change item quantity\n"
+         << "6. Checkout\n"
+         << "7. For You recommendation\n"
+         << "8. Exit\n";
 }
 
 
-// ---------- functions ----------
+// ---------- Product functions ----------
 void displayProducts() {
     cout << "\n--- Products ---\n"
          << fixed << setprecision(2);
@@ -147,7 +153,7 @@ int cartQuantityOf(int index) {
 }
 
 
-// ---------- NEW FEATURE For You recommendation ----------
+// ---------- For You recommendation ----------
 void recommendProduct() {
     cout << "\n===== For You Recommendation =====\n";
 
@@ -164,13 +170,9 @@ void recommendProduct() {
         int availableStock =
             products[i].stock - cartQuantityOf((int)i);
 
-        // Product must:
-        // 1. Still be available
-        // 2. Be within the user's budget
         if (availableStock > 0 &&
             products[i].price <= budget) {
 
-            // Choose the highest-priced affordable product
             if (bestIndex == -1 ||
                 products[i].price > products[bestIndex].price) {
 
@@ -186,6 +188,7 @@ void recommendProduct() {
     }
     else {
         cout << "\nRecommended for you:\n";
+
         cout << products[bestIndex].name
              << " - RM"
              << products[bestIndex].price
@@ -317,6 +320,63 @@ void removeFromCart() {
 }
 
 
+// ---------- NEW FEATURE: Change cart quantity ----------
+void changeCartQuantity() {
+
+    if (cart.empty()) {
+        cout << "\nYour cart is empty.\n";
+        return;
+    }
+
+    viewCart();
+
+    int choice = getInt(
+        "Item number to change (0 to cancel): ",
+        0,
+        (int)cart.size()
+    );
+
+    if (choice == 0)
+        return;
+
+    int cartIndex = choice - 1;
+    int productIndex = cart[cartIndex].index;
+
+    int oldQuantity = cart[cartIndex].qty;
+    int maxQuantity = products[productIndex].stock;
+
+    cout << "\nSelected: "
+         << products[productIndex].name
+         << "\n";
+
+    cout << "Current quantity: "
+         << oldQuantity
+         << "\n";
+
+    int newQuantity = getInt(
+        "New quantity (1-" +
+        to_string(maxQuantity) +
+        "): ",
+        1,
+        maxQuantity
+    );
+
+    cart[cartIndex].qty = newQuantity;
+
+    cout << "Quantity updated from "
+         << oldQuantity
+         << " to "
+         << newQuantity
+         << ".\n";
+
+    cout << "New subtotal: RM"
+         << fixed
+         << setprecision(2)
+         << subtotal()
+         << "\n";
+}
+
+
 // ---------- Discount system ----------
 double askDiscount(vector<string>& notes) {
     double rate = 0.0;
@@ -409,6 +469,7 @@ string choosePayment() {
 
 // ---------- Checkout ----------
 void checkout() {
+
     if (cart.empty()) {
         cout << "\nYour cart is empty. Add something first.\n";
         return;
@@ -567,7 +628,6 @@ void checkout() {
         products[item.index].stock -= item.qty;
     }
 
-    // Clear cart after checkout
     cart.clear();
 }
 
@@ -591,7 +651,7 @@ int main() {
         showMenu();
 
         choice =
-            getInt("Choice: ", 1, 7);
+            getInt("Choice: ", 1, 8);
 
 
         switch (choice) {
@@ -613,19 +673,23 @@ int main() {
                 break;
 
             case 5:
-                checkout();
+                changeCartQuantity();
                 break;
 
             case 6:
-                recommendProduct();
+                checkout();
                 break;
 
             case 7:
+                recommendProduct();
+                break;
+
+            case 8:
                 cout << "Thanks for visiting. Goodbye!\n";
                 break;
         }
 
-    } while (choice != 7);
+    } while (choice != 8);
 
 
     return 0;
