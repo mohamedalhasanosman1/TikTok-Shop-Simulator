@@ -1,16 +1,13 @@
 /*
- * TikTok Shop Simulator - Interactive console system (C++)
- * Theme: TikTok Social Commerce
- *
- * Features:
- * - Browse products
- * - Add to cart
- * - View/remove items
- * - Change cart quantity
- * - Promo codes
- * - Live stream discount
- * - "For You" product recommendation
- * - Checkout with receipt
+  - Browse products
+  - Add to cart
+  - View/remove items
+  - Change cart quantity
+  - Promo codes
+  - Live stream discount
+  - "For You" product recommendation
+  - Checkout with receipt
+  - Total item count on receipt
  */
 
 #include <iostream>
@@ -263,6 +260,18 @@ double subtotal() {
 }
 
 
+// ---------- NEW FEATURE: Count total items ----------
+int totalItemsInCart() {
+    int total = 0;
+
+    for (const CartItem& item : cart) {
+        total += item.qty;
+    }
+
+    return total;
+}
+
+
 void viewCart() {
     if (cart.empty()) {
         cout << "\nYour cart is empty.\n";
@@ -320,7 +329,6 @@ void removeFromCart() {
 }
 
 
-// ---------- NEW FEATURE: Change cart quantity ----------
 void changeCartQuantity() {
 
     if (cart.empty()) {
@@ -562,6 +570,16 @@ void checkout() {
 
 
     cout << string(36, '-')
+         << "\n";
+
+
+    // NEW: Total number of items
+    cout << left
+         << setw(24)
+         << "Total items"
+         << right
+         << setw(10)
+         << totalItemsInCart()
          << "\n";
 
 
